@@ -18,16 +18,18 @@ jobs:
   build:
     runs-on: macos-15
     steps:
-      - uses: actions/checkout@v4
+      - name: Clone WebDriverAgent
+        run: git clone https://github.com/appium/WebDriverAgent.git
 
       - name: Build WebDriverAgent for testing
         run: |
+          cd WebDriverAgent
           xcodebuild build-for-testing \
             -workspace WebDriverAgent.xcworkspace \
             -scheme WebDriverAgentRunner \
             -sdk iphoneos \
             -configuration Release \
-            -derivedDataPath ./DerivedData \
+            -derivedDataPath ../DerivedData \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
