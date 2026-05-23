@@ -25,7 +25,7 @@ jobs:
         run: |
           cd WebDriverAgent
           xcodebuild build-for-testing \
-            -workspace WebDriverAgent.xcworkspace \
+            -project WebDriverAgent.xcodeproj \
             -scheme WebDriverAgentRunner \
             -sdk iphoneos \
             -configuration Release \
