@@ -1,0 +1,48 @@
+# GitHub Actions workflow to build WebDriverAgent IPA
+# Fork this to your own repo on GitHub and run via Actions tab.
+# The built IPA will be available as an artifact download.
+#
+# How to use:
+# 1. Fork https://github.com/appium/WebDriverAgent to your GitHub account
+# 2. Copy this file to .github/workflows/build.yml in your fork
+# 3. Go to Actions tab → "Build WDA IPA" → Run workflow
+# 4. Download the artifact (unsigned WDA.ipa)
+# 5. Sign it locally with zsign + your certificate
+# 6. Install via: ios install --path=WDA_signed.ipa
+# 7. Run via: ios runwda
+
+name: Build WDA IPA
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build WebDriverAgent for testing
+        run: |
+          xcodebuild build-for-testing \
+            -workspace WebDriverAgent.xcworkspace \
+            -scheme WebDriverAgentRunner \
+            -sdk iphoneos \
+            -configuration Release \
+            -derivedDataPath ./DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Create IPA
+        run: |
+          APP_PATH=$(find ./DerivedData -name "WebDriverAgentRunner-Runner.app" -type d | head -1)
+          echo "App found at: $APP_PATH"
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          zip -r WDA.ipa Payload
+          ls -la WDA.ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WDA-unsigned
+          path: WDA.ipa
